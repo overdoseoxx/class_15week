@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>오늘 뭐먹지?</title>
+  <style>
+  @font-face {
+    font-family: 'UhBeeGmin2';
+     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeGmin2.woff') format('woff');
+     font-weight: normal;
+     font-style: normal;
+ }
+   @font-face {
+     font-family: 'UhBeeDoolDool';
+     src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeDoolDool.woff') format('woff');
+     font-weight: normal;
+     font-style: normal;
+ }
+    @font-face {
+      font-family: 'Ownglyph_okticon-Bd';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/Ownglyph_okticon-Bd.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
+    body {text-align: center; background: #000;font-family: sans-serif; margin: 0;cursor: url('뒤집게.png'), auto;}
+    * {cursor: url('뒤집게.png') 60 51, auto !important;}
+    .header-title {font-family: 'UhBeeGmin2', sans-serif;font-size: 120px; color: white; padding: 80px 0 40px;}
+
+    .ticker-wrap {width: 100%;overflow: hidden;background: #B6F200; height: 100px; display: flex;align-items: center;white-space: nowrap;}
+    .ticker {display: inline-block;white-space: nowrap;animation: scroll-left 60s linear infinite;}
+    .ticker span {display: inline-block; padding-right: 100px; font-family: 'UhBeeDoolDool', sans-serif; font-size: 42px; color: black; letter-spacing: 5px;}
+    @keyframes scroll-left {0%   { transform: translateX(0%); }100% { transform: translateX(-100%); }}
+
+    #combination-box {margin-top: 0px;margin-bottom: 40px;font-size: 24px;display: flex;justify-content: center;align-items: flex-start;gap: 20px;}
+    .slot-wrapper {display: flex;flex-direction: column;align-items: center;}
+    .slot {width: 140px; height: 140px;border:none; dashed #aaa;background: white; display: flex;
+      justify-content: center; align-items: center;position: relative;font-size: 40px;color: #999;
+      border-radius: 20px;overflow: hidden;padding: 10px}
+    .slot.selected {border: 4px solid #B6F200;}
+    .slot img {width: 100%;height: 100%;object-fit: contain;}
+    .slot-label { margin-top: 20px;font-size: 18px;font-family: 'Ownglyph_okticon-Bd', sans-serif;color: white; min-height: 24px;}
+    #result-box img {width: 100%;height: 100%;object-fit: contain;display: none;}
+
+    #no-recipe-text {display: none;font-family: 'Ownglyph_okticon-Bd', sans-serif;font-size: 18px;background: white;color: black;padding: 12px 28px;border-radius: 8px;height: 48px;line-height: 24px;display: flex;align-items: center;justify-content: center;cursor: default;box-sizing: border-box;margin-bottom: 60px;}
+
+    #result-label { font-family: 'Ownglyph_okticon-Bd', sans-serif;font-size: 18px;color: white;margin-top: 20px; margin-bottom: 12px;display: none;}
+    #recipe-link {display: none; margin-bottom: 60px; font-size: 18px; font-family: 'Ownglyph_okticon-Bd', sans-serif; background: white; color: black;border: none; padding: 12px 28px; border-radius: 8px; cursor: pointer; transition: background 0.3s, color 0.3s;}
+    #recipe-link:hover {background: #B6F200;color: black;}
+    #reset-button {display: none;margin-bottom: 60px;font-size: 18px;font-family: 'Ownglyph_okticon-Bd', sans-serif;background: white; color: black;border: none;padding: 12px 28px;border-radius: 8px;cursor: pointer;transition: background 0.3s, color 0.3s;}
+    #reset-button:hover {background: #B6F200;color: black;}
+    #button-group {display: flex;justify-content: center;gap: 20px;}
+
+   .green-glow { filter: drop-shadow(0 0 4px #b6f200) drop-shadow(0 0 8px #b6f200) drop-shadow(0 0 16px #b6f200);transition: filter 0.3s ease;}
+    .green-footer { background-color: #B6F200;padding: 60px 0;color: black;}
+    
+    .footer{background:#B6F200;padding:80px 0;}
+   .footer-wrap{max-width:1200px;margin:auto;display:flex;align-items:center;padding:0 40px;gap:350px;}
+
+    .footer-img{height:140px;}
+    .footer-texts{text-align:left;margin-left:-20px;}
+    .footer-title{font-family:'UhBeeGmin2';font-size:48px;color:black;}
+    .footer-desc{font-family:'Ownglyph_okticon-Bd';font-size:16px;color:black;margin-top:10px; padding-left: 10px}
+
+
+  #fridge-container {position: relative;display: inline-block; margin-bottom:15px}
+    .ingredient-icon {position: absolute;width: 70px;cursor: pointer;border-radius: 8px;display: none;opacity: 0.9;}
+    .토마토 { top: 495px; left: 150px; width: 120px; opacity: 0.7; }
+    .당근   { top: 490px; left: 265px; width: 160px; opacity: 0.7; }
+    .계란1   { top: 130px;  left: 810px; width: 90px; }
+    .계란2   { top: 130px;  left: 730px; width: 90px; }
+    .계란3   { top: 130px;  left: 650px; width: 90px; }
+    .우유1   { top: 220px; left: 650px; width: 40px; opacity: 0.9; }
+    .우유2   { top: 220px; left: 690px; width: 40px; opacity: 0.9; }
+    .식빵   { top: 360px; left: 140px; width: 120px; opacity: 0.95;}
+    .밥   { top: 145px; left: 140px; width: 120px; opacity: 1.0;}
+    .간장  { top: 215px; left: 750px; width: 40px; opacity: 0.9;}
+    .굴소스  { top: 217px; left: 800px; width: 29px; opacity: 0.9;}
+    .케찹 { top: 217px;left: 890px; width: 63px; opacity: 0.9;}
+    .드레싱 { top: 214px; left: 950px; width: 48px; opacity: 0.9; }
+    .마요네즈  { top: 217px; left: 830px; width: 70px; opacity: 0.9;}
+    .양파  { top: 490px; left: 405px; width: 130px; opacity: 0.7; }
+    .참치캔 { top: 350px; left: 650px; width: 85px; opacity: 0.9; }
+    .참치캔1 { top: 350px; left: 720px; width: 85px; opacity: 0.9; }
+    .옥수수콘 { top: 480px; left: 650px; width: 120px; opacity: 0.9; }
+    .옥수수콘1 { top: 480px; left: 740px; width: 120px; opacity: 0.9; }
+    .치즈 { top: 405px; left: 300px; width: 90px; opacity: 0.9; }
+    .치즈1 { top: 405px; left: 380px; width: 90px; opacity: 0.9; }
+    .김치 { top: 125px; left: 250px; width: 130px; opacity: 0.9; }
+    .스팸 { top: 400px; left: 800px; width: 80px; opacity: 0.9; }
+    .스팸1 { top: 400px; left: 880px; width: 80px; opacity: 0.9; }
+    .닭가슴살 { top: 270px; left: 140px; width: 100px; opacity: 0.95; }
+    .양배추 { top: 280px; left: 250px; width: 120px; opacity: 0.95; }
+    .파스타면 { top: 480px; left: 850px; width: 100px; opacity: 0.9; }
+    .페페론치노 { top: 213px; left: 990px; width:60px; opacity: 0.9; }
+    .마늘 { top: 275px; left: 370px; width: 100px; opacity: 0.9; }
+    .대파 {top: 150px;left: 380px;width: 120px;opacity: 0.9;}
+    .라면 { top: 510px; left: 945px;width: 100px;opacity: 0.9;}
+
+
+
+   
+
+  </style>
+</head>
+<body>
+  <div class="header-title">냉장고를 부탁해</div>
+  <div class="ticker-wrap">
+  <div class="ticker">
+    <span>오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 토마토 당근 양파 양배추 계란 우유 밥 김치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 케찹 드레싱 마요네즈 굴소스 간장 빵 치즈 콘옥수수 스팸 참치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 토마토 당근 양파 양배추 계란 우유 밥 김치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 케찹 드레싱 마요네즈 굴소스 간장 빵 치즈 콘옥수수 스팸 참치
+    오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 토마토 당근 양파 양배추 계란 우유 밥 김치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 케찹 드레싱 마요네즈 굴소스 간장 빵 치즈 콘옥수수 스팸 참치
+    오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 토마토 당근 양파 양배추 계란 우유 밥 김치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 케찹 드레싱 마요네즈 굴소스 간장 빵 치즈 콘옥수수 스팸 참치
+    오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 토마토 당근 양파 양배추 계란 우유 밥 김치 오늘 뭐 먹지? 지금 냉장고에 뭐가 있더라? 케찹 드레싱 마요네즈 굴소스 간장 빵 치즈 콘옥수수 스팸 참치</span>
+  
+   
+  </div>
+</div>
+
+
+<div id="fridge-container">
+  <img id="fridge-img" src="냉장고_닫힘.png" style="width: 780px;" alt="냉장고">
+  <img src="계란.png" class="ingredient-icon 계란1" data-name="계란">
+  <img src="계란.png" class="ingredient-icon 계란2" data-name="계란">
+  <img src="계란.png" class="ingredient-icon 계란3" data-name="계란">
+  <img src="당근.png" class="ingredient-icon 당근" data-name="당근">
+  <img src="우유.png" class="ingredient-icon 우유1" data-name="우유">
+  <img src="우유.png" class="ingredient-icon 우유2" data-name="우유">
+  <img src="토마토.png" class="ingredient-icon 토마토" data-name="토마토">
+  <img src="식빵.png" class="ingredient-icon 식빵" data-name="식빵">
+  <img src="밥.png" class="ingredient-icon 밥" data-name="밥">
+  <img src="간장.png" class="ingredient-icon 간장" data-name="간장">
+  <img src="양파.png" class="ingredient-icon 양파" data-name="양파">
+  <img src="굴소스.png" class="ingredient-icon 굴소스" data-name="굴소스">
+  <img src="마요네즈.png" class="ingredient-icon 마요네즈" data-name="마요네즈">
+  <img src="참치캔.png" class="ingredient-icon 참치캔" data-name="참치캔">
+  <img src="참치캔.png" class="ingredient-icon 참치캔1" data-name="참치캔">
+  <img src="옥수수콘.png" class="ingredient-icon 옥수수콘" data-name="옥수수콘">
+  <img src="옥수수콘.png" class="ingredient-icon 옥수수콘1" data-name="옥수수콘">
+  <img src="치즈.png" class="ingredient-icon 치즈" data-name="치즈">
+  <img src="치즈.png" class="ingredient-icon 치즈1" data-name="치즈">
+  <img src="김치.png" class="ingredient-icon 김치" data-name="김치">
+  <img src="스팸.png" class="ingredient-icon 스팸" data-name="스팸">
+  <img src="스팸.png" class="ingredient-icon 스팸1" data-name="스팸">
+  <img src="닭가슴살.png" class="ingredient-icon 닭가슴살" data-name="닭가슴살">
+  <img src="드레싱.png" class="ingredient-icon 드레싱" data-name="드레싱">
+  <img src="케찹.png" class="ingredient-icon 케찹" data-name="케찹">
+  <img src="양배추.png" class="ingredient-icon 양배추" data-name="양배추">
+  <img src="파스타면.png" class="ingredient-icon 파스타면" data-name="파스타면">
+  <img src="페페론치노.png" class="ingredient-icon 페페론치노" data-name="페페론치노">
+  <img src="마늘.png" class="ingredient-icon 마늘" data-name="마늘">
+  <img src="대파.png" class="ingredient-icon 대파" data-name="대파">
+  <img src="라면.png" class="ingredient-icon 라면" data-name="라면">
+
+
+
+
+
+
+</div>
+
+
+  <div id="combination-box">
+    <div class="slot-wrapper">
+      <div class="slot" id="slot1"></div>
+      <div class="slot-label" id="label1"></div>
+    </div>
+    <div style="line-height: 140px; color: white;">+</div>
+    <div class="slot-wrapper">
+      <div class="slot" id="slot2"></div>
+      <div class="slot-label" id="label2"></div>
+    </div>
+    <div style="line-height: 140px; color: white;">+</div>
+    <div class="slot-wrapper">
+      <div class="slot" id="slot3"></div>
+      <div class="slot-label" id="label3"></div>
+    </div>
+    <div style="line-height: 140px; color: white;">=</div>
+    <div class="slot-wrapper">
+      <div class="slot" id="result-box">
+        <img id="result-img" src="">
+        <div id="result-x" style="display:none;">❌</div>
+      </div>
+      <div class="slot-label" id="result-label"></div>
+    </div>
+  </div>
+
+  <div id="button-group">
+  <button id="reset-button">다시하기</button>
+  <button id="recipe-link">레시피 보러가기</button>
+  <div id="no-recipe-text">레시피 없음</div>
+  </div>
+
+<footer class="footer">
+  <div class="footer-wrap">
+    <img src="토마토마.png" class="footer-img">
+    <div class="footer-texts">
+      <div class="footer-title">냉장고를 부탁해</div>
+      <div class="footer-desc">© 2025 윤설 All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const 조합결과 = {
+  '계란,당근,우유': { 이미지: '계란찜.png', 이름: '계란찜', 링크: 'https://www.10000recipe.com/recipe/6872350' },
+  '계란,식빵,우유': { 이미지: '프렌치토스트.png', 이름: '프렌치토스트', 링크: 'https://www.10000recipe.com/recipe/6904190' },
+  '간장,계란,밥': { 이미지: '간장계란밥.png', 이름: '간장계란밥', 링크: 'https://www.10000recipe.com/recipe/6940597' },
+  '계란,양파,토마토': { 이미지: '토마토계란볶음.png', 이름: '토마토 계란볶음', 링크: 'https://www.10000recipe.com/recipe/6855392' },
+  '계란,굴소스,밥': { 이미지: '굴소스계란볶음밥.png', 이름: '굴소스 계란볶음밥', 링크: 'https://www.10000recipe.com/recipe/6665436' },
+  '계란,밥,케찹': { 이미지: '오므라이스.png', 이름: '오므라이스', 링크: 'https://www.10000recipe.com/recipe/7012645' },
+  '김치,밥,치즈': { 이미지: '김치치즈볶음밥.png', 이름: '김치치즈 볶음밥', 링크: 'https://www.10000recipe.com/recipe/6923592' },
+  '마요네즈,밥,참치캔': { 이미지: '참치마요덮밥.png', 이름: '참치마요 덮밥', 링크: 'https://www.10000recipe.com/recipe/6879335' },
+  '마요네즈,밥,스팸': { 이미지: '스팸마요덮밥.png', 이름: '스팸마요 덮밥', 링크: 'https://www.10000recipe.com/recipe/6878335' },
+  '마요네즈,옥수수콘,치즈': { 이미지: '콘치즈.png', 이름: '콘치즈', 링크: 'https://www.10000recipe.com/recipe/6845227' },
+  '닭가슴살,드레싱,양배추': { 이미지: '닭가슴살샐러드.png', 이름: '닭가슴살 샐러드', 링크: 'https://www.10000recipe.com/recipe/7006068' },
+  '우유,치즈,파스타면': { 이미지: '우유파스타.png', 이름: '우유파스타', 링크: 'https://www.10000recipe.com/recipe/6978150' },
+  '굴소스,양파,참치캔': { 이미지: '참치맛나니.png', 이름: '참치맛나니', 링크: 'https://www.10000recipe.com/recipe/6869513' },
+  '드레싱,치즈,토마토': { 이미지: '카프레제.png', 이름: '카프레제', 링크: 'https://www.10000recipe.com/recipe/6839269' },
+  '스팸,식빵,치즈': { 이미지: '햄치즈토스트.png', 이름: '햄치즈토스트', 링크: 'https://www.10000recipe.com/recipe/6868056' },
+  '마늘,파스타면,페페론치노': { 이미지: '알리오올리오.png', 이름: '알리오올리오', 링크: 'https://www.10000recipe.com/recipe/6836975' },
+  '양파,케찹,파스타면': { 이미지: '나폴리탄파스타.png', 이름: '나폴리탄 파스타', 링크: 'https://www.10000recipe.com/recipe/6877487' },
+  '계란,닭가슴살,밥': { 이미지: '오야꼬동.png', 이름: '오야꼬동', 링크: 'https://www.10000recipe.com/recipe/6862451' },
+  '김치,밥,스팸': { 이미지: '김치스팸볶음밥.png', 이름: '김치스팸 볶음밥', 링크: 'https://www.10000recipe.com/recipe/5590466' },
+  '김치,대파,참치캔': { 이미지: '참치김치찌개.png', 이름: '참치김치찌개', 링크: 'https://www.10000recipe.com/recipe/6864674' },
+  '대파,라면,양파': { 이미지: '해장라면.png', 이름: '해장라면', 링크: 'https://www.10000recipe.com/recipe/6841117' },
+  '당근,대파,마늘': { 이미지: '당근볶음.png', 이름: '당근볶음', 링크: 'https://www.10000recipe.com/recipe/6880989' },
+  '계란,당근,대파': { 이미지: '계란말이.png', 이름: '계란말이', 링크: 'https://www.10000recipe.com/recipe/6916604' },
+  '당근,드레싱,양배추': { 이미지: '코울슬로.png', 이름: '코울슬로', 링크: 'https://www.10000recipe.com/recipe/6843715' },
+  '마늘,양파,토마토': { 이미지: '토마토야채스프.png', 이름: '토마토 야채스프', 링크: 'https://www.10000recipe.com/recipe/6904655' },
+  '당근,마요네즈,옥수수콘': { 이미지: '콘샐러드.png', 이름: '콘샐러드', 링크: 'https://www.10000recipe.com/recipe/6874556' },
+  '간장,계란,마늘': { 이미지: '계란조림.png', 이름: '계란조림', 링크: 'https://www.10000recipe.com/recipe/6906766' },
+  '계란,마늘,페페론치노': { 이미지: '계란감바스.png', 이름: '계란 감바스', 링크: 'https://www.10000recipe.com/recipe/7021703' },
+  '닭가슴살,당근,양배추': { 이미지: '양배추말이.png', 이름: '양배추말이', 링크: 'https://www.10000recipe.com/recipe/6884169' },
+  '굴소스,라면,마요네즈': { 이미지: '굴소스마요라면.png', 이름: '굴소스 마요라면', 링크: 'https://www.10000recipe.com/recipe/6833589' },
+};
+
+const fridgeImg = document.getElementById('fridge-img');
+const slots = [slot1, slot2, slot3];
+const labels = [label1, label2, label3];
+const resultImg = document.getElementById('result-img');
+const resultX = document.getElementById('result-x');
+const resultLabel = document.getElementById('result-label');
+const recipeLink = document.getElementById('recipe-link');
+const noRecipeText = document.getElementById('no-recipe-text');
+const resetButton = document.getElementById('reset-button');
+const buttonGroup = document.getElementById('button-group');
+
+let 선택된재료 = ["", "", ""];
+let 현재선택슬롯 = 0;
+
+slots.forEach((slot, idx) => {
+  slot.addEventListener('click', () => {
+    if (labels[idx].textContent) {
+      재료삭제(idx);
+    } else {
+      현재선택슬롯 = idx;
+      slots.forEach(s => s.classList.remove('selected'));
+      slot.classList.add('selected');
+    }
+  });
+});
+
+document.querySelectorAll('.ingredient-icon').forEach(icon => {
+  icon.addEventListener('click', () => {
+    const 재료이름 = icon.dataset.name;
+    const 제거인덱스 = 선택된재료.findIndex(r => r === 재료이름);
+    if (제거인덱스 !== -1) {
+      재료삭제(제거인덱스);
+      return;
+    }
+    if (선택된재료.filter(Boolean).length >= 3) return;
+    if (!slots[현재선택슬롯]) return;
+
+    const img = document.createElement('img');
+    img.src = `${재료이름}.png`;
+    img.alt = 재료이름;
+    slots[현재선택슬롯].innerHTML = '';
+    slots[현재선택슬롯].appendChild(img);
+    labels[현재선택슬롯].textContent = 재료이름;
+    선택된재료[현재선택슬롯] = 재료이름;
+
+    재조합();
+    하이라이트가능한재료();
+    const 다음 = 선택된재료.findIndex(r => r === "");
+    현재선택슬롯 = 다음 !== -1 ? 다음 : 0;
+    slots.forEach(s => s.classList.remove('selected'));
+    if (slots[현재선택슬롯]) slots[현재선택슬롯].classList.add('selected');
+  });
+});
+
+function 재료삭제(idx) {
+  slots[idx].innerHTML = '';
+  labels[idx].textContent = '';
+  선택된재료[idx] = "";
+  재조합();
+  하이라이트가능한재료();
+}
+
+function 재조합() {
+  resultImg.style.display = 'none';
+  resultImg.src = '';
+  resultX.style.display = 'none';
+  resultLabel.textContent = '';
+  resultLabel.style.display = 'none';
+  noRecipeText.style.display = 'none';
+  recipeLink.style.display = 'none';
+  recipeLink.onclick = null;
+
+  const 재료만 = 선택된재료.filter(r => r !== "");
+  if (재료만.length === 3) {
+    const key = 재료만.slice().sort().join(',');
+    const 결과 = 조합결과[key];
+    if (결과) {
+      resultImg.src = `${결과.이미지}`;
+      resultImg.style.display = 'block';
+      resultLabel.textContent = 결과.이름;
+      resultLabel.style.display = 'block';
+      recipeLink.style.display = 'inline-block';
+      recipeLink.onclick = () => {
+        window.open(결과.링크, '_blank');
+      };
+      resetButton.style.display = 'inline-block';
+      buttonGroup.style.justifyContent = 'center';
+    } else {
+      resultX.style.display = 'block';
+      noRecipeText.style.display = 'inline-block';
+      resetButton.style.display = 'inline-block';
+      recipeLink.style.display = 'none';
+      buttonGroup.style.justifyContent = 'center';
+    }
+  } else {
+    resetButton.style.display = 선택된재료.some(Boolean) ? 'inline-block' : 'none';
+    recipeLink.style.display = 'none';
+    buttonGroup.style.justifyContent = 'center';
+  }
+}
+
+function 하이라이트가능한재료() {
+  const 재료만 = 선택된재료.filter(Boolean);
+  const 가능재료 = new Set();
+  document.querySelectorAll('.ingredient-icon').forEach(icon => icon.classList.remove('green-glow'));
+  if (재료만.length === 1 || 재료만.length === 2) {
+    Object.keys(조합결과).forEach(key => {
+      const 조합 = key.split(',');
+      if (재료만.every(r => 조합.includes(r))) {
+        조합.forEach(r => {
+          if (!재료만.includes(r)) 가능재료.add(r);
+        });
+      }
+    });
+    가능재료.forEach(이름 => {
+      document.querySelectorAll(`.ingredient-icon[data-name="${이름}"]`).forEach(icon => {
+        icon.classList.add('green-glow');
+      });
+    });
+  }
+}
+
+resetButton.addEventListener('click', () => {
+  선택된재료 = ["", "", ""];
+  slots.forEach((slot, idx) => {
+    slot.innerHTML = '';
+    labels[idx].textContent = '';
+  });
+  resultImg.style.display = 'none';
+  resultImg.src = '';
+  resultX.style.display = 'none';
+  resultLabel.textContent = '';
+  resultLabel.style.display = 'none';
+  recipeLink.style.display = 'none';
+  noRecipeText.style.display = 'none';
+  resetButton.style.display = 'inline-block';
+  buttonGroup.style.justifyContent = 'center';
+  하이라이트가능한재료();
+});
+
+let isFridgeOpen = false;
+fridgeImg.addEventListener('click', () => {
+  if (!isFridgeOpen) {
+    fridgeImg.src = '냉장고_열림.png';
+    fridgeImg.style.width = '1200px';
+    isFridgeOpen = true;
+    document.querySelectorAll('.ingredient-icon').forEach(icon => icon.style.display = 'block');
+    현재선택슬롯 = 0;
+    slots.forEach(s => s.classList.remove('selected'));
+    slots[0].classList.add('selected');
+  }
+});
+</script>
+
+
+</body>
+</html>
